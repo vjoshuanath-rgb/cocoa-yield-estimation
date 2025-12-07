@@ -1,0 +1,10 @@
+# Render deployment configuration
+# This tells Render how to build and run the Flask API
+
+# Build Command: pip install -r requirements.txt
+# Start Command: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 120 api.detect:app
+
+# Worker configuration optimized for CPU-bound AI inference:
+# - 1 worker: Prevents memory issues on free tier
+# - 2 threads: Allows concurrent requests without overloading CPU
+# - 120s timeout: Allows time for slow CPU inference

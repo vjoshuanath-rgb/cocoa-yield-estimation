@@ -7,6 +7,7 @@ from PIL import Image
 import io
 import base64
 import os
+import torch
 
 app = Flask(__name__)
 CORS(app)
@@ -14,6 +15,10 @@ CORS(app)
 # Load the trained YOLOv8 model
 MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'public', 'models', 'best.pt')
 model = YOLO(MODEL_PATH)
+
+# Force CPU mode and optimize for speed
+model.model.eval()  # Set to evaluation mode
+torch.set_num_threads(2)  # Limit threads for free tier
 
 # Class names mapping
 CLASS_NAMES = {
@@ -36,11 +41,29 @@ def detect():
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         
-        # Store original dimensions
-        orig_height, orig_width = img.shape[:2]
+        # Resize image to smaller size for faster CPU inference
+        # Max dimension of 416 pixels (instead of 640) for speed
+        height, width = img.shape[:2]
+        max_dim = 416
+        if max(height, width) > max_dim:
+            scale = max_dim / max(height, width)
+            new_width = int(width * scale)
+            new_height = int(height * scale)
+            img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_LINEAR)
         
-        # Run inference
-        results = model(img, conf=0.25, iou=0.45)
+        # Store original dimensions
+        orig_height, orig_width = height, width
+        
+        # Run inference with optimized settings for CPU
+        results = model(
+            img, 
+            conf=0.25,      # Confidence threshold
+            iou=0.45,       # NMS IoU threshold  
+            imgsz=416,      # Smaller image size for speed
+            half=False,     # No FP16 on CPU
+            device='cpu',   # Explicitly use CPU
+            verbose=False   # Reduce logging overhead
+        )
         
         # Process results
         detections = []
