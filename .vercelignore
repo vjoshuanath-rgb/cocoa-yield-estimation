@@ -1,0 +1,16 @@
+# Ignore Python API files - API is deployed separately on Render
+api/
+public/models/
+requirements.txt
+*.pt
+*.py
+__pycache__/
+*.pyc
+.python-version
+
+# Ignore development files
+.venv/
+venv/
+env/
+*.ipynb
+.ipynb_checkpoints/

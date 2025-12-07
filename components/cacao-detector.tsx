@@ -278,10 +278,11 @@ export function CacaoDetector() {
           const formData = new FormData()
           formData.append("image", blob, "frame.jpg")
 
-          const apiResponse = await fetch("http://localhost:5001/api/detect", {
-            method: "POST",
-            body: formData,
-          })
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+        const apiResponse = await fetch(`${apiUrl}/api/detect`, {
+          method: 'POST',
+          body: formData,
+        })
 
           if (apiResponse.ok) {
             const data = await apiResponse.json()
@@ -350,10 +351,12 @@ export function CacaoDetector() {
       const blob = await response.blob()
 
       const formData = new FormData()
-      formData.append("image", blob, "image.jpg")
-
-      const apiResponse = await fetch("http://localhost:5001/api/detect", {
-        method: "POST",
+      formData.append('image', blob, 'image.jpg')
+      
+      // Call the detection API
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+      const apiResponse = await fetch(`${apiUrl}/api/detect`, {
+        method: 'POST',
         body: formData,
       })
 
