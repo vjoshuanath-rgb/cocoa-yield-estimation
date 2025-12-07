@@ -48,7 +48,7 @@ model = YOLO(MODEL_PATH)
 # Force CPU mode and optimize for speed
 model.model.eval()  # Set to evaluation mode
 torch.set_num_threads(2)  # Limit threads for free tier
-print("Model loaded successfully!")
+print(f"Model loaded successfully! Using YOLOv8 - Model type: {model.model.__class__.__name__}")
 
 # Class names mapping
 CLASS_NAMES = {
