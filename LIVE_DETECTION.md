@@ -60,7 +60,7 @@ Your app now supports **real-time live detection** using the camera! Instead of 
 ### Key Components:
 
 **1. Frame Capture Loop:**
-```typescript
+\`\`\`typescript
 const captureFrameAndDetect = async () => {
   // Extract frame from video
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
@@ -80,17 +80,17 @@ const captureFrameAndDetect = async () => {
     requestAnimationFrame(captureFrameAndDetect)
   })
 }
-```
+\`\`\`
 
 **2. State Management:**
-```typescript
+\`\`\`typescript
 const [isLiveDetection, setIsLiveDetection] = useState(false)
 const [fps, setFps] = useState(0)
 const animationFrameRef = useRef<number | null>(null)
-```
+\`\`\`
 
 **3. Toggle Control:**
-```typescript
+\`\`\`typescript
 const toggleLiveDetection = () => {
   if (isLiveDetection) {
     cancelAnimationFrame(animationFrameRef.current)
@@ -100,7 +100,7 @@ const toggleLiveDetection = () => {
     captureFrameAndDetect()
   }
 }
-```
+\`\`\`
 
 ## Performance Optimization
 
@@ -113,34 +113,34 @@ const toggleLiveDetection = () => {
 ### Potential Improvements:
 
 **1. Throttling:**
-```typescript
+\`\`\`typescript
 // Process every Nth frame
 let frameCount = 0
 if (frameCount % 3 === 0) {
   captureFrameAndDetect()
 }
 frameCount++
-```
+\`\`\`
 
 **2. Web Workers:**
-```typescript
+\`\`\`typescript
 // Offload processing to worker thread
 const worker = new Worker('detection-worker.js')
 worker.postMessage(frameData)
-```
+\`\`\`
 
 **3. WebGL Acceleration:**
-```typescript
+\`\`\`typescript
 // Use GPU for frame processing
 const gl = canvas.getContext('webgl')
-```
+\`\`\`
 
 **4. Lower Resolution:**
-```typescript
+\`\`\`typescript
 // Reduce frame size for faster processing
 canvas.width = video.videoWidth / 2
 canvas.height = video.videoHeight / 2
-```
+\`\`\`
 
 ## Browser Compatibility
 
@@ -200,13 +200,13 @@ The live detection uses the same endpoint as static detection:
 - Body: `image` (JPEG blob)
 
 **Response:**
-```json
+\`\`\`json
 {
   "class": "phytophthora",
   "confidence": 0.89,
   "all_detections": [...]
 }
-```
+\`\`\`
 
 **Performance:**
 - Response time: 50-100ms
@@ -233,7 +233,7 @@ The live detection uses the same endpoint as static detection:
 ## Advanced Usage
 
 ### Custom Frame Rate:
-```typescript
+\`\`\`typescript
 // Add delay between frames
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -246,10 +246,10 @@ const captureFrameAndDetect = async () => {
     requestAnimationFrame(captureFrameAndDetect)
   }
 }
-```
+\`\`\`
 
 ### Confidence Filtering:
-```typescript
+\`\`\`typescript
 // Only show high-confidence results
 if (data.confidence > 0.7) {
   setResult({
@@ -257,17 +257,17 @@ if (data.confidence > 0.7) {
     confidence: data.confidence
   })
 }
-```
+\`\`\`
 
 ### Result Smoothing:
-```typescript
+\`\`\`typescript
 // Average last N results
 const resultHistory = []
 resultHistory.push(data)
 if (resultHistory.length > 5) {
   const avgConfidence = resultHistory.reduce((sum, r) => sum + r.confidence, 0) / 5
 }
-```
+\`\`\`
 
 ## Comparison: Live vs Static
 

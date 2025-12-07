@@ -5,23 +5,23 @@
 Your cocoa disease detection system is ready! Here's how to use it:
 
 ### Option 1: One-Command Start (Recommended)
-```bash
+\`\`\`bash
 ./start.sh
-```
+\`\`\`
 This starts both the API server and web app simultaneously.
 
 ### Option 2: Manual Start (Two Terminals)
 
 **Terminal 1 - API Server:**
-```bash
+\`\`\`bash
 source venv/bin/activate
 python3 api/detect.py
-```
+\`\`\`
 
 **Terminal 2 - Web App:**
-```bash
+\`\`\`bash
 npm run dev
-```
+\`\`\`
 
 ### Access the App
 Open your browser and navigate to:
@@ -82,22 +82,22 @@ The app will show:
 
 ### "Port Already in Use"
 - **Port 5001 busy**: Kill the process using port 5001
-  ```bash
+  \`\`\`bash
   lsof -ti:5001 | xargs kill -9
-  ```
+  \`\`\`
 - **Port 3000 busy**: Kill the process using port 3000
-  ```bash
+  \`\`\`bash
   lsof -ti:3000 | xargs kill -9
-  ```
+  \`\`\`
 
 ### Model Not Loading
 - **Check model file**: Ensure `public/models/best.pt` exists
 - **Verify size**: Model should be ~6MB
 - **Reinstall dependencies**:
-  ```bash
+  \`\`\`bash
   source venv/bin/activate
   pip install -r requirements.txt
-  ```
+  \`\`\`
 
 ---
 
@@ -121,7 +121,7 @@ The app will show:
 
 ## 📁 Project Structure
 
-```
+\`\`\`
 cocoa-disease-detection/
 ├── api/
 │   └── detect.py              # Flask API server
@@ -136,7 +136,7 @@ cocoa-disease-detection/
 ├── setup.sh                   # Installation script
 ├── start.sh                   # Start both servers
 └── requirements.txt           # Python deps
-```
+\`\`\`
 
 ---
 

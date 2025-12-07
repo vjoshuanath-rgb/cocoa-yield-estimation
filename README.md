@@ -45,25 +45,25 @@ A full-stack web application for detecting diseases in cocoa pods using deep lea
 ### Installation
 
 1. **Clone and setup**
-```bash
+\`\`\`bash
 git clone <your-repo-url>
 cd cocoa-disease-detection
 ./setup.sh
-```
+\`\`\`
 
 2. **Start both servers**
-```bash
+\`\`\`bash
 ./start.sh
-```
+\`\`\`
 Or manually in separate terminals:
-```bash
+\`\`\`bash
 # Terminal 1 - API Server
 source venv/bin/activate
 python3 api/detect.py
 
 # Terminal 2 - Web App
 npm run dev
-```
+\`\`\`
 
 3. **Open browser** at http://localhost:3000
 
@@ -104,7 +104,7 @@ npm run dev
 
 ## 📁 Project Structure
 
-```
+\`\`\`
 cocoa-disease-detection/
 ├── api/
 │   └── detect.py              # Flask API for YOLOv8 inference
@@ -122,14 +122,14 @@ cocoa-disease-detection/
 ├── package.json               # Node dependencies
 ├── setup.sh                   # Setup script
 └── start.sh                   # Start both servers
-```
+\`\`\`
 
 ## 📊 API Endpoints
 
 **POST** `/api/detect`
 - Request: `multipart/form-data` with `image` file
 - Response:
-```json
+\`\`\`json
 {
   "class": "phytophthora",
   "confidence": 0.87,
@@ -141,7 +141,7 @@ cocoa-disease-detection/
     }
   ]
 }
-```
+\`\`\`
 
 **GET** `/api/health`
 - Response: `{"status": "ok", "model_loaded": true}`
@@ -149,9 +149,9 @@ cocoa-disease-detection/
 ## 🐛 Troubleshooting
 
 **Port 5001 already in use:**
-```bash
+\`\`\`bash
 lsof -ti:5001 | xargs kill -9
-```
+\`\`\`
 
 **Camera shows black screen:**
 - Refresh page
