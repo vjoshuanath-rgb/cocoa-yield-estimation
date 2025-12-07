@@ -14,11 +14,27 @@ CORS(app)
 
 # Load the trained YOLOv8 model
 MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'public', 'models', 'best.pt')
+
+# Check if model exists and is valid
+if not os.path.exists(MODEL_PATH):
+    raise FileNotFoundError(f"Model file not found at {MODEL_PATH}")
+
+# Verify model file integrity before loading
+try:
+    file_size = os.path.getsize(MODEL_PATH)
+    print(f"Loading model from {MODEL_PATH} (size: {file_size} bytes)")
+    if file_size < 1000000:  # Less than 1MB is suspicious
+        raise ValueError(f"Model file appears corrupted (only {file_size} bytes)")
+except Exception as e:
+    print(f"Error checking model file: {e}")
+    raise
+
 model = YOLO(MODEL_PATH)
 
 # Force CPU mode and optimize for speed
 model.model.eval()  # Set to evaluation mode
 torch.set_num_threads(2)  # Limit threads for free tier
+print("Model loaded successfully!")
 
 # Class names mapping
 CLASS_NAMES = {
