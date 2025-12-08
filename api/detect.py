@@ -31,8 +31,10 @@ def ensure_model():
     
     # Download from GitHub Releases
     print("Downloading model from GitHub Releases...")
+    # Try direct download link first, fallback to API
     url = "https://github.com/vjoshuanath-rgb/cocoa-disease-detection/releases/download/v1.0/best.pt"
-    response = requests.get(url, stream=True)
+    print(f"Attempting download from: {url}")
+    response = requests.get(url, stream=True, allow_redirects=True)
     
     if response.status_code == 200:
         with open(MODEL_PATH, 'wb') as f:
