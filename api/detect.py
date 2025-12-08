@@ -14,37 +14,6 @@ CORS(app)
 
 # Load the trained YOLOv8 model
 MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'public', 'models', 'best.pt')
-
-# Download model from GitHub Releases if not present or corrupted
-def ensure_model():
-    import requests
-    os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
-    
-    # Check if model exists and is valid
-    if os.path.exists(MODEL_PATH):
-        file_size = os.path.getsize(MODEL_PATH)
-        if file_size > 10000000:  # > 10MB
-            print(f"Model found: {file_size} bytes")
-            return
-        print(f"Model corrupted ({file_size} bytes), redownloading...")
-        os.remove(MODEL_PATH)
-    
-    # Download from GitHub Releases
-    print("Downloading model from GitHub Releases...")
-    # Try direct download link first, fallback to API
-    url = "https://github.com/vjoshuanath-rgb/cocoa-disease-detection/releases/download/v1.0/best.pt"
-    print(f"Attempting download from: {url}")
-    response = requests.get(url, stream=True, allow_redirects=True)
-    
-    if response.status_code == 200:
-        with open(MODEL_PATH, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-        print(f"Model downloaded successfully: {os.path.getsize(MODEL_PATH)} bytes")
-    else:
-        raise Exception(f"Failed to download model: HTTP {response.status_code}")
-
-ensure_model()
 model = YOLO(MODEL_PATH)
 
 # Force CPU mode and optimize for speed
