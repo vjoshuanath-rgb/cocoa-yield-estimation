@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-type DiseaseClass = "healthy" | "monilia" | "phytophthora" | null
+type DiseaseClass = "HEALTHY" | "BLACKPOD" | "FROSTYPOD" | "MIRID" | null
 
 interface Detection {
   class: DiseaseClass
@@ -37,7 +37,7 @@ interface DetectionResult {
 }
 
 const diseaseInfo = {
-  healthy: {
+  HEALTHY: {
     label: "Healthy",
     icon: Leaf,
     color: "text-emerald-700",
@@ -48,19 +48,8 @@ const diseaseInfo = {
     gradientTo: "to-emerald-600",
     description: "This cocoa pod appears healthy with no visible signs of disease. Continue regular monitoring.",
   },
-  monilia: {
-    label: "Monilia",
-    icon: Bug,
-    color: "text-amber-700",
-    bgColor: "bg-amber-50",
-    borderColor: "border-amber-300",
-    boxColor: "#d97706",
-    gradientFrom: "from-amber-500",
-    gradientTo: "to-amber-600",
-    description: "Moniliasis (frosty pod rot) detected. This fungal disease causes white spore masses and pod rot.",
-  },
-  phytophthora: {
-    label: "Phytophthora",
+  BLACKPOD: {
+    label: "Black Pod Disease",
     icon: AlertTriangle,
     color: "text-red-700",
     bgColor: "bg-red-50",
@@ -68,7 +57,29 @@ const diseaseInfo = {
     boxColor: "#dc2626",
     gradientFrom: "from-red-500",
     gradientTo: "to-red-600",
-    description: "Phytophthora (black pod disease) detected. A serious infection causing progressive pod blackening.",
+    description: "Black Pod Disease (Phytophthora) detected. A serious infection causing progressive pod blackening and rot.",
+  },
+  FROSTYPOD: {
+    label: "Frosty Pod Rot",
+    icon: Bug,
+    color: "text-purple-700",
+    bgColor: "bg-purple-50",
+    borderColor: "border-purple-300",
+    boxColor: "#9333ea",
+    gradientFrom: "from-purple-500",
+    gradientTo: "to-purple-600",
+    description: "Frosty Pod Rot (Moniliophthora) detected. This fungal disease causes white spore masses and pod rot.",
+  },
+  MIRID: {
+    label: "Mirid Bug Damage",
+    icon: Bug,
+    color: "text-orange-700",
+    bgColor: "bg-orange-50",
+    borderColor: "border-orange-300",
+    boxColor: "#ea580c",
+    gradientFrom: "from-orange-500",
+    gradientTo: "to-orange-600",
+    description: "Mirid bug damage detected. These insects cause lesions and can lead to die-back and reduced yields.",
   },
 }
 
@@ -430,7 +441,7 @@ export function CacaoDetector() {
               Cacao Disease Detection
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
-              AI-powered analysis for early detection of Monilia, Phytophthora, and healthy cocoa pods
+              AI-powered analysis for early detection of Black Pod, Frosty Pod, Mirid damage, and healthy cocoa pods
             </p>
 
             {/* Stats Row */}
@@ -445,7 +456,7 @@ export function CacaoDetector() {
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-accent" />
-                <span className="text-sm text-muted-foreground">3 Disease Classes</span>
+                <span className="text-sm text-muted-foreground">4 Disease Classes</span>
               </div>
             </div>
           </div>
@@ -499,7 +510,7 @@ export function CacaoDetector() {
                 <div>
                   <h3 className="font-semibold text-foreground mb-1">Detection Classes</h3>
                   <p className="text-sm text-muted-foreground">
-                    Healthy pods, Monilia (frosty pod rot), and Phytophthora (black pod disease)
+                    Healthy pods, Black Pod disease, Frosty Pod rot, and Mirid bug damage
                   </p>
                 </div>
               </div>
@@ -508,8 +519,8 @@ export function CacaoDetector() {
         )}
 
         {/* Disease Classes Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {(["healthy", "monilia", "phytophthora"] as const).map((type) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {(["HEALTHY", "BLACKPOD", "FROSTYPOD", "MIRID"] as const).map((type) => {
             const info = diseaseInfo[type]
             const Icon = info.icon
             const isActive = result?.class === type || result?.all_detections?.some((d) => d.class === type)
@@ -524,7 +535,8 @@ export function CacaoDetector() {
               >
                 {isActive && (
                   <div
-                    className={`absolute top-3 right-3 w-2 h-2 rounded-full ${info.boxColor === "#059669" ? "bg-emerald-500" : info.boxColor === "#d97706" ? "bg-amber-500" : "bg-red-500"} animate-pulse`}
+                    className={`absolute top-3 right-3 w-2 h-2 rounded-full animate-pulse`}
+                    style={{ backgroundColor: info.boxColor }}
                   />
                 )}
                 <div className="flex items-start gap-4">

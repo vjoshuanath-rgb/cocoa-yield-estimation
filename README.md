@@ -1,79 +1,137 @@
-# 🍫 Cocoa Disease Detection
+# � Cacao Yield Estimator
 
-*Real-time AI-powered detection of cocoa pod diseases using YOLOv8*
+*AI-powered estimation of cacao pod yield potential using self-supervised learning*
 
 ## Overview
 
-A full-stack web application for detecting diseases in cocoa pods using deep learning. Features real-time camera detection with bounding boxes, file uploads, and instant analysis.
+A full-stack mobile and web application for estimating cacao pod yield potential using deep learning. This system enables farmers, buyers, and cooperatives to make data-driven harvesting decisions without destructive pod opening.
 
-**Detects 3 classes:**
-- ✅ **Healthy** pods
-- 🦠 **Monilia** (Frosty pod rot)  
-- ⚠️ **Phytophthora** (Black pod disease)
+**Estimates yield in 3 categories:**
+- 📈 **High Yield** - Pods with high bean count potential
+- 📊 **Medium Yield** - Average expected bean count
+- 📉 **Low Yield** - Lower bean count expected
 
 ## ✨ Features
 
-- 📸 **Live Camera Detection**: Real-time detection with bounding boxes at 10-20 FPS
-- 📦 **Bounding Boxes**: Visual boxes around detected pods with labels
-- 📁 **File Upload**: Upload and analyze images from your device
-- 🖱️ **Drag & Drop**: Simple drag-and-drop interface
-- 🎯 **Multiple Detections**: Shows all detected diseases in one image
-- 📊 **Confidence Scores**: Displays detection confidence percentage
+- 📱 **Mobile App**: React Native Expo app for iOS and Android
+- 📸 **Real-time Camera**: Point and shoot for instant yield analysis
+- 🤖 **YOLOv8 Segmentation**: Accurate pod detection and isolation
+- 🧠 **Self-Supervised Learning**: MobileNetV3 with SimCLR (no labels needed)
+- 📊 **Relative Ranking**: Siamese network for yield comparison
+- 🎯 **Multi-pod Analysis**: Analyze multiple pods in one image
+- 💾 **History Tracking**: Save and review past assessments
+- ⚡ **Offline Mode**: Works without internet connection
 - 🎨 **Modern UI**: Beautiful interface with dark mode support
-- ⚡ **Fast Inference**: ~50-100ms per image
 
 ## 🛠️ Tech Stack
 
-**Frontend:**
-- Next.js 16 with TypeScript
-- Tailwind CSS
-- Shadcn UI Components
-- Canvas API for bounding boxes
+**Mobile App:**
+- React Native with Expo
+- TypeScript
+- Expo Camera & Image Picker
+- ONNX Runtime for inference
 
-**Backend:**
+**Backend API:**
 - Flask (Python REST API)
-- YOLOv8 (Ultralytics)
+- YOLOv8 Segmentation (Ultralytics)
+- PyTorch for inference
 - OpenCV for image processing
+
+**Training:**
+- Google Colab with GPU
+- YOLOv8n-seg model
+- MobileNetV3 + SimCLR
+- Siamese ranking network
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ and npm
+- Node.js 18+ and npm/pnpm
 - Python 3.8+
-- Trained YOLOv8 model (`best.pt` in `public/models/`)
+- Expo CLI (`npm install -g expo-cli`)
+- Google Colab (for training)
 
-### Installation
+### 1. Train Models (Google Colab)
 
-1. **Clone and setup**
+**Step 1: Train YOLOv8 Segmentation**
 \`\`\`bash
+# Open train_cacao_segmentation_yolov8.ipynb in Colab
+# Add your Roboflow API key: YOUR_API_KEY_HERE
+# Run all cells
+# Download: cacao_segmentation_best.pt
+\`\`\`
+
+**Step 2: Train Yield Estimation Model**
+\`\`\`bash
+# Open train_yield_estimation_simclr.ipynb in Colab
+# Upload segmentation model from step 1
+# Run all cells
+# Download: complete_yield_model.pt and yield_ranking_model.onnx
+\`\`\`
+
+### 2. Setup Mobile App
+
+\`\`\`bash
+# Clone repository
 git clone <your-repo-url>
 cd cocoa-disease-detection
-./setup.sh
+
+# Install mobile app dependencies
+cd mobile-app
+npm install
+
+# Add trained models to assets
+mkdir -p assets/models
+# Copy your trained .onnx models here
+
+# Start Expo development server
+npx expo start
+# Scan QR code with Expo Go app
 \`\`\`
 
-2. **Start both servers**
+**Detailed Setup**: See [MOBILE_APP_SETUP.md](./MOBILE_APP_SETUP.md)
+
+### 3. Run Backend API (Optional)
+
 \`\`\`bash
-./start.sh
+pip install flask flask-cors ultralytics opencv-python pillow torch
+cd api
+python detect.py
+# API runs on http://localhost:5001
 \`\`\`
-Or manually in separate terminals:
-\`\`\`bash
-# Terminal 1 - API Server
-source venv/bin/activate
-python3 api/detect.py
-
-# Terminal 2 - Web App
-npm run dev
-\`\`\`
-
-3. **Open browser** at http://localhost:3000
 
 ## 📖 Usage
 
-### Live Detection (Recommended)
-1. Click **"Use Camera"** button
-2. Allow camera permissions
-3. Click **"Start Live Detection"**
-4. Point camera at cocoa pods
+### Mobile App
+1. Open Expo Go app on your phone
+2. Scan QR code from terminal
+3. Allow camera and storage permissions
+4. **Take Photo** or **Choose from Gallery**
+5. View yield estimation results
+6. Save to history for tracking
+
+### API Usage
+\`\`\`bash
+curl -X POST -F "image=@pod.jpg" \\
+  http://localhost:5001/api/estimate-yield
+\`\`\`
+
+Response:
+\`\`\`json
+{
+  "success": true,
+  "overall_yield": "High",
+  "pod_count": 3,
+  "pods": [
+    {
+      "pod_id": 0,
+      "yield_category": "High",
+      "confidence": 0.92,
+      "yield_score": 0.85
+    }
+  ]
+}
+\`\`\`
 5. See real-time bounding boxes and results
 
 ### Static Image Upload
@@ -88,86 +146,154 @@ npm run dev
 
 1. **Upload dataset to Google Drive:**
    - Path: `MyDrive/cocoa-disease-detection/dataset/`
-   - Structure: `train/`, `val/`, `test/` with `images/` and `labels/`
+   - Structure: `train/`, `val/`, `test/` with `images/` and `labels/`## 🎓 How It Works
 
-2. **Open training notebook:**
-   - Upload `cocoa_disease_yolov8_colab.ipynb` to Google Colab
-   - Enable T4 GPU: Runtime → Change runtime type → GPU
+### Training Pipeline
 
-3. **Run all cells:**
-   - Training: ~30-60 minutes
-   - Model saved: `MyDrive/cocoa-disease-detection/yolov8_training/weights/best.pt`
+1. **YOLOv8 Segmentation Training**
+   - Upload `train_cacao_segmentation_yolov8.ipynb` to Colab
+   - Enable T4/A100 GPU
+   - Connect Roboflow dataset
+   - Training: ~1-2 hours
+   - Download: `cacao_segmentation_best.pt`
 
-4. **Download `best.pt`** and place in `public/models/`
+2. **MobileNetV3 + SimCLR Training**
+   - Upload `train_yield_estimation_simclr.ipynb` to Colab
+   - Extract pod crops using segmentation model
+   - Self-supervised feature learning (no labels!)
+   - Training: ~2-3 hours
+   - Download: `complete_yield_model.pt`
 
-**Expected Performance:** mAP50 > 0.70
+3. **Deployment**
+   - Convert models to ONNX format
+   - Copy to mobile app assets
+   - Deploy via Expo EAS
 
 ## 📁 Project Structure
 
 \`\`\`
 cocoa-disease-detection/
 ├── api/
-│   └── detect.py              # Flask API for YOLOv8 inference
-├── app/
-│   ├── page.tsx               # Main page
-│   └── layout.tsx             # App layout
-├── components/
-│   └── cacao-detector.tsx     # Detection component with camera
-├── public/
-│   └── models/
-│       └── best.pt            # Trained YOLOv8 model
-├── cocoa_disease_yolov8_colab.ipynb  # Training notebook
-├── convert_supervisely_to_yolo.py    # Dataset conversion
-├── requirements.txt           # Python dependencies
-├── package.json               # Node dependencies
-├── setup.sh                   # Setup script
-└── start.sh                   # Start both servers
+│   └── detect.py                          # Yield estimation API
+├── mobile-app/                             # React Native app
+│   ├── app/                               # Expo Router screens
+│   ├── assets/models/                     # AI models (.onnx)
+│   ├── package.json
+│   └── app.json
+├── train_cacao_segmentation_yolov8.ipynb  # Training notebook 1
+├── train_yield_estimation_simclr.ipynb    # Training notebook 2
+├── public/models/                          # Trained models (.pt)
+├── MOBILE_APP_SETUP.md                     # Setup instructions
+├── README.md
+└── requirements.txt
 \`\`\`
 
 ## 📊 API Endpoints
 
-**POST** `/api/detect`
+**POST** `/api/estimate-yield`
 - Request: `multipart/form-data` with `image` file
 - Response:
 \`\`\`json
 {
-  "class": "phytophthora",
-  "confidence": 0.87,
-  "all_detections": [
+  "success": true,
+  "overall_yield": "High",
+  "pod_count": 3,
+  "pods": [
     {
-      "class": "phytophthora",
-      "confidence": 0.87,
-      "bbox": [x1, y1, x2, y2]
+      "pod_id": 0,
+      "yield_category": "High",
+      "confidence": 0.92,
+      "yield_score": 0.85,
+      "bbox": [x1, y1, x2, y2],
+      "morphology": {
+        "area": 45000,
+        "aspect_ratio": 1.52,
+        "perimeter": 850
+      }
     }
   ]
 }
 \`\`\`
 
 **GET** `/api/health`
-- Response: `{"status": "ok", "model_loaded": true}`
+- Response: `{"status": "ok", "segmentation_model_loaded": true, "service": "Cacao Yield Estimator API"}`
 
 ## 🐛 Troubleshooting
 
-**Port 5001 already in use:**
-\`\`\`bash
-lsof -ti:5001 | xargs kill -9
-\`\`\`
+See [MOBILE_APP_SETUP.md](./MOBILE_APP_SETUP.md#troubleshooting) for detailed solutions.
 
-**Camera shows black screen:**
-- Refresh page
-- Check camera permissions in browser
-- Try different browser (Chrome/Safari)
-
-**API connection error:**
-- Ensure Python server running on port 5001
-- Check `http://localhost:5001/api/health`
-- Restart: `source venv/bin/activate && python3 api/detect.py`
-
-**Model not loading:**
-- Verify `public/models/best.pt` exists
-- Check file size (~6MB)
+**Quick Fixes:**
+- Models not loading: Check `assets/models/` directory
+- Camera not working: Grant permissions in phone settings
+- Slow inference: Use quantized models, reduce resolution
+- App crashes: Clear cache `npx expo start -c`
 
 ## 📚 Documentation
+
+- **Mobile App Setup**: [MOBILE_APP_SETUP.md](./MOBILE_APP_SETUP.md)
+- **Training Guide**: See notebooks for detailed comments
+- **API Documentation**: Check `/api/detect.py` for endpoint details
+- **Dataset**: [Roboflow Cacao Dataset](https://universe.roboflow.com/cariesdetectionproject/cacao-uf6rm)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+## 📄 License
+
+MIT License - See [LICENSE](LICENSE) file for details
+
+## 🙏 Acknowledgments
+
+- **YOLOv8** by Ultralytics
+- **MobileNetV3** architecture by Google
+- **SimCLR** self-supervised learning framework
+- **Roboflow** for dataset hosting
+- **Expo** team for mobile framework
+- Cacao farmers worldwide for inspiration
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/yourusername/cacao-yield-estimator/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/cacao-yield-estimator/discussions)
+- **Email**: support@cacaoyield.app
+
+## 🎯 Roadmap
+
+- [x] YOLOv8 segmentation training notebook
+- [x] SimCLR yield estimation training notebook
+- [x] Mobile app MVP (React Native Expo)
+- [x] Backend API for yield estimation
+- [ ] Cloud sync for assessment history
+- [ ] Multi-language support (Spanish, Portuguese, French)
+- [ ] Farmer feedback integration system
+- [ ] Advanced analytics dashboard
+- [ ] Integration with farm management systems
+- [ ] Real-time collaborative features
+
+## 📊 Citation
+
+If you use this system in research, please cite:
+
+\`\`\`bibtex
+@software{cacao_yield_estimator_2026,
+  title={Cacao Pod Yield Estimation using Self-Supervised Learning},
+  author={Your Name},
+  year={2026},
+  publisher={GitHub},
+  url={https://github.com/yourusername/cacao-yield-estimator}
+}
+\`\`\`
+
+---
+
+**Made with ❤️ for cacao farmers worldwide**
+
+*Empowering sustainable cacao production through AI*
 
 - **README.md** (this file) - Main documentation
 - **USAGE.md** - Detailed usage guide with troubleshooting

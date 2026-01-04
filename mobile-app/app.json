@@ -1,0 +1,71 @@
+{
+  "expo": {
+    "name": "Cacao Yield Estimator",
+    "slug": "cacao-yield-estimator",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.svg",
+    "scheme": "cacaoyield",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.svg",
+      "resizeMode": "contain",
+      "backgroundColor": "#1e293b"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cacaoyield.estimator",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs camera access to analyze cacao pods for yield estimation.",
+        "NSPhotoLibraryUsageDescription": "This app needs photo library access to analyze saved cacao pod images.",
+        "NSPhotoLibraryAddUsageDescription": "This app needs permission to save analyzed pod images to your photo library."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.svg",
+        "backgroundColor": "#1e293b"
+      },
+      "package": "com.cacaoyield.estimator",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.svg"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Cacao Yield Estimator to access your camera for pod analysis."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Cacao Yield Estimator to access your photos for pod analysis."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    }
+  }
+}

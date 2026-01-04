@@ -1,0 +1,8 @@
+
+<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" fill="#8b5a3c"/>
+  <ellipse cx="512" cy="512" rx="307.2" ry="409.6" fill="#d4a574"/>
+  <ellipse cx="512" cy="512" rx="256" ry="358.4" fill="#b8956a"/>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" 
+        font-family="Arial" font-size="153.6" fill="#fff" font-weight="bold">CY</text>
+</svg>
