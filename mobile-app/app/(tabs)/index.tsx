@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,16 @@ import {
   Image,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera } from 'expo-camera';
+import {
+  loadModels,
+  detectAndEstimateYield,
+  areModelsLoaded,
+} from '../../services/apiService';
 
 type YieldCategory = 'Low' | 'Medium' | 'High' | null;
 
@@ -18,6 +24,7 @@ interface Detection {
   bbox: number[];
   confidence: number;
   yieldCategory: YieldCategory;
+  yieldScore: number;
 }
 
 export default function HomeScreen() {
@@ -26,17 +33,37 @@ export default function HomeScreen() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [detections, setDetections] = useState<Detection[]>([]);
   const [overallYield, setOverallYield] = useState<YieldCategory>(null);
+  const [overallYieldScore, setOverallYieldScore] = useState<number | null>(null);
+  const [modelsLoading, setModelsLoading] = useState(true);
+  const [modelsError, setModelsError] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
     })();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        console.log('📦 Loading AI models...');
+        await loadModels();
+        console.log('✅ Models loaded successfully');
+        setModelsLoading(false);
+      } catch (error) {
+        console.error('❌ Failed to load models:', error);
+        setModelsError(
+          'Failed to load AI models. Please restart the app.'
+        );
+        setModelsLoading(false);
+      }
+    })();
+  }, []);
+
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: false,
       quality: 1,
     });
@@ -60,35 +87,41 @@ export default function HomeScreen() {
   };
 
   const analyzeImage = async (uri: string) => {
+    if (!areModelsLoaded()) {
+      Alert.alert(
+        'Models Not Ready',
+        'AI models are still loading. Please wait a moment.'
+      );
+      return;
+    }
+
     setIsAnalyzing(true);
     setDetections([]);
     setOverallYield(null);
+    setOverallYieldScore(null);
 
     try {
-      // TODO: Implement actual model inference
-      // This is a placeholder - you'll need to implement ONNX runtime or TensorFlow.js
+      console.log('🔍 Analyzing image with AI models...');
+      const result = await detectAndEstimateYield(uri);
       
-      // Simulate API call or local inference
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log(`✅ Analysis complete: ${result.detections.length} pods detected`);
+      console.log(`📊 Overall yield score: ${result.overallYieldScore}`);
+      setDetections(result.detections);
+      setOverallYield(result.overallYield);
+      setOverallYieldScore(result.overallYieldScore || null);
 
-      // Mock results
-      const mockDetections: Detection[] = [
-        {
-          bbox: [100, 100, 300, 300],
-          confidence: 0.92,
-          yieldCategory: 'High',
-        },
-        {
-          bbox: [350, 150, 500, 320],
-          confidence: 0.85,
-          yieldCategory: 'Medium',
-        },
-      ];
-
-      setDetections(mockDetections);
-      setOverallYield('High');
+      if (result.detections.length === 0) {
+        Alert.alert(
+          'No Pods Detected',
+          'No cacao pods were found in this image. Try taking a clearer photo.'
+        );
+      }
     } catch (error) {
-      console.error('Analysis error:', error);
+      console.error('❌ Analysis error:', error);
+      Alert.alert(
+        'Analysis Failed',
+        'Failed to analyze the image. Please try again.'
+      );
     } finally {
       setIsAnalyzing(false);
     }
@@ -110,20 +143,23 @@ export default function HomeScreen() {
   const getYieldIcon = (category: YieldCategory) => {
     switch (category) {
       case 'High':
-        return 'trending-up';
+        return 'trending-up' as const;
       case 'Medium':
-        return 'remove';
+        return 'remove' as const;
       case 'Low':
-        return 'trending-down';
+        return 'trending-down' as const;
       default:
-        return 'help';
+        return 'help' as const;
     }
   };
 
-  if (hasPermission === null) {
+  if (hasPermission === null || modelsLoading) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#10b981" />
+        <Text style={styles.loadingText}>
+          {modelsLoading ? 'Loading AI models...' : 'Requesting permissions...'}
+        </Text>
       </View>
     );
   }
@@ -135,6 +171,26 @@ export default function HomeScreen() {
         <Text style={styles.permissionText}>
           Camera permission is required to analyze pods
         </Text>
+      </View>
+    );
+  }
+
+  if (modelsError) {
+    return (
+      <View style={styles.container}>
+        <Ionicons name="alert-circle-outline" size={64} color="#ef4444" />
+        <Text style={styles.errorText}>{modelsError}</Text>
+        <TouchableOpacity
+          style={[styles.button, styles.primaryButton]}
+          onPress={() => {
+            setModelsError(null);
+            setModelsLoading(true);
+            loadModels()
+              .then(() => setModelsLoading(false))
+              .catch(() => setModelsError('Failed to load models'));
+          }}>
+          <Text style={styles.buttonText}>Retry</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -190,9 +246,34 @@ export default function HomeScreen() {
                     size={32}
                     color="#fff"
                   />
-                  <Text style={styles.overallYieldText}>
-                    Overall: {overallYield} Yield
-                  </Text>
+                  <View>
+                    <Text style={styles.overallYieldText}>
+                      Overall: {overallYield} Yield
+                    </Text>
+                    <Text style={styles.overallYieldScore}>
+                      {overallYieldScore !== null 
+                        ? `Score: ${(overallYieldScore * 100).toFixed(1)}%`
+                        : 'Calculating...'}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.legend}>
+                  <Text style={styles.legendTitle}>Yield Score Ranges:</Text>
+                  <View style={styles.legendItems}>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#ef4444' }]} />
+                      <Text style={styles.legendText}>Low: 0-33%</Text>
+                    </View>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#f59e0b' }]} />
+                      <Text style={styles.legendText}>Medium: 33-67%</Text>
+                    </View>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#10b981' }]} />
+                      <Text style={styles.legendText}>High: 67-100%</Text>
+                    </View>
+                  </View>
                 </View>
 
                 <Text style={styles.detectionsTitle}>
@@ -219,7 +300,10 @@ export default function HomeScreen() {
                       </View>
                     </View>
                     <Text style={styles.confidence}>
-                      Confidence: {(detection.confidence * 100).toFixed(1)}%
+                      Detection: {(detection.confidence * 100).toFixed(1)}%
+                    </Text>
+                    <Text style={styles.yieldScore}>
+                      Yield Score: {(detection.yieldScore * 100).toFixed(1)}%
                     </Text>
                   </View>
                 ))}
@@ -333,6 +417,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 12,
   },
+  errorText: {
+    fontSize: 16,
+    color: '#94a3b8',
+    textAlign: 'center',
+    marginTop: 16,
+    marginBottom: 16,
+  },
   resultsPanel: {
     backgroundColor: '#1e293b',
     borderRadius: 12,
@@ -351,6 +442,40 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
+  },
+  overallYieldScore: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 2,
+  },
+  legend: {
+    backgroundColor: '#334155',
+    borderRadius: 8,
+    padding: 12,
+    gap: 8,
+  },
+  legendTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  legendItems: {
+    gap: 6,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  legendDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  legendText: {
+    fontSize: 13,
+    color: '#94a3b8',
   },
   detectionsTitle: {
     fontSize: 18,
@@ -389,6 +514,11 @@ const styles = StyleSheet.create({
   confidence: {
     fontSize: 14,
     color: '#94a3b8',
+  },
+  yieldScore: {
+    fontSize: 14,
+    color: '#10b981',
+    fontWeight: '600',
   },
   infoBox: {
     flexDirection: 'row',
