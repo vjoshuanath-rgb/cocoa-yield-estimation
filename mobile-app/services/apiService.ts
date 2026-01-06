@@ -19,7 +19,7 @@ interface DetectionResult {
 // Set your backend API URL here
 // IMPORTANT: When using Expo, DO NOT use 'localhost'!
 // Use your computer's actual IP address on the local network
-const API_BASE_URL = 'http://192.168.1.6:5001';
+const API_BASE_URL = 'http://192.168.1.19:5001';
 
 let isInitialized = false;
 let useMockData = false;

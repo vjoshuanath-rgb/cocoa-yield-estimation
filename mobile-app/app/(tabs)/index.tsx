@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera } from 'expo-camera';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   loadModels,
   detectAndEstimateYield,
@@ -36,6 +37,7 @@ export default function HomeScreen() {
   const [overallYieldScore, setOverallYieldScore] = useState<number | null>(null);
   const [modelsLoading, setModelsLoading] = useState(true);
   const [modelsError, setModelsError] = useState<string | null>(null);
+  const [saveHistory, setSaveHistory] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -43,6 +45,22 @@ export default function HomeScreen() {
       setHasPermission(status === 'granted');
     })();
   }, []);
+
+  useEffect(() => {
+    // Load save history setting
+    loadHistorySetting();
+  }, []);
+
+  const loadHistorySetting = async () => {
+    try {
+      const saved = await AsyncStorage.getItem('saveHistory');
+      if (saved !== null) {
+        setSaveHistory(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Failed to load history setting:', error);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -110,6 +128,11 @@ export default function HomeScreen() {
       setOverallYield(result.overallYield);
       setOverallYieldScore(result.overallYieldScore || null);
 
+      // Save to history if enabled
+      if (saveHistory && result.detections.length > 0) {
+        await saveToHistory(uri, result.overallYield, result.detections.length);
+      }
+
       if (result.detections.length === 0) {
         Alert.alert(
           'No Pods Detected',
@@ -124,6 +147,32 @@ export default function HomeScreen() {
       );
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const saveToHistory = async (imageUri: string, overallYield: YieldCategory, podCount: number) => {
+    try {
+      const historyItem = {
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        imageUri,
+        overallYield,
+        podCount,
+      };
+
+      const existingHistory = await AsyncStorage.getItem('analysisHistory');
+      const history = existingHistory ? JSON.parse(existingHistory) : [];
+      
+      // Add new item at the beginning
+      history.unshift(historyItem);
+      
+      // Keep only the last 50 items
+      const trimmedHistory = history.slice(0, 50);
+      
+      await AsyncStorage.setItem('analysisHistory', JSON.stringify(trimmedHistory));
+      console.log('💾 Saved to history');
+    } catch (error) {
+      console.error('Failed to save to history:', error);
     }
   };
 

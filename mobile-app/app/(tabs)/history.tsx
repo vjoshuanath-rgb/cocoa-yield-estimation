@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 interface HistoryItem {
   id: string;
@@ -21,9 +22,12 @@ interface HistoryItem {
 export default function HistoryScreen() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
-  useEffect(() => {
-    loadHistory();
-  }, []);
+  // Reload history when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      loadHistory();
+    }, [])
+  );
 
   const loadHistory = async () => {
     try {
@@ -133,7 +137,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
-    paddingTop: 0,
+    paddingTop: 20,
+    marginBottom: 8,
   },
   title: {
     fontSize: 28,
@@ -152,6 +157,7 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: 20,
+    paddingTop: 0,
     gap: 12,
   },
   card: {
@@ -173,15 +179,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    gap: 8,
+    marginBottom: 4,
   },
   date: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#94a3b8',
+    flex: 1,
+    flexShrink: 1,
   },
   yieldBadge: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
+    flexShrink: 0,
   },
   yieldText: {
     fontSize: 12,

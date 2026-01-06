@@ -8,11 +8,40 @@ import {
   Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const [enableGPU, setEnableGPU] = React.useState(true);
   const [saveHistory, setSaveHistory] = React.useState(true);
   const [debugMode, setDebugMode] = React.useState(false);
+
+  // Load settings on mount
+  React.useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const saved = await AsyncStorage.getItem('saveHistory');
+      if (saved !== null) {
+        setSaveHistory(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+    }
+  };
+
+  const handleSaveHistoryToggle = async (value: boolean) => {
+    setSaveHistory(value);
+    try {
+      await AsyncStorage.setItem('saveHistory', JSON.stringify(value));
+      console.log('💾 Save history setting updated:', value);
+    } catch (error) {
+      console.error('Failed to save setting:', error);
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -72,7 +101,7 @@ export default function SettingsScreen() {
             </View>
             <Switch
               value={saveHistory}
-              onValueChange={setSaveHistory}
+              onValueChange={handleSaveHistoryToggle}
               trackColor={{ false: '#475569', true: '#10b981' }}
             />
           </View>
@@ -96,7 +125,7 @@ export default function SettingsScreen() {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.linkButton}>
+          <TouchableOpacity style={styles.linkButton} onPress={() => router.push('/user-guide')}>
             <Ionicons name="book" size={20} color="#10b981" />
             <Text style={styles.linkText}>User Guide</Text>
             <Ionicons name="chevron-forward" size={20} color="#64748b" />
